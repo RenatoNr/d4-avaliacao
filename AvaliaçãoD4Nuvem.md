@@ -28,11 +28,27 @@ Na camada de dados, será utilizado o banco de dados SQL Server com as seguintes
 
 Será utilizado o recurso de Load Balancer Standard.
 
-## Diagrama da infraestrutura
+### Diagrama da infraestrutura
+![Digrama de infraestrutura](https://github.com/RenatoNr/d4-avaliacao/blob/master/assests/diagram.png)
 
+### Balanceamento de carga 
+
+Será utilizado o recusro de Load Balancer Standad da Azure para dividir o fluxo de trabalho da aplicação. 
+A camada de backend será duplicada nas 2 máquinas virtuais, cada uma acessando o mesmo banco de dados. o Load Balancer vai permitir uma divisão do trabalho do sistema nos momentos de pico, e em caso de falha de uma das VMs, será direcionado o fluxo para a que está em funcionamento. A depender da demanda, nesta configuração fica mais fácil o escalonamento horizontal, adicionando mais VMs para suprir a demanda. 
 
 ## Arquitetura da aplicação
 
-Será utilizado o padrão de Request-Reply assíncrono, pois será implementado o conceito de fila quando o usuário compra um ingresso. 
-O cliente faz o processo de compra de um ticket, dependo do fluxo de usuários ao mesmo tempo na aplicação, a requisição é enviada ao backend e entra em uma fila por ordem de requisição.
-A aplicação retorna o status 202 de requisição aceita e vai pra fila de processamento. Após 
+Será utilizado o padrão de Request-Reply assíncrono, pois será implementado o conceito de fila quando o usuário efetua a compra de ingresso(s). 
+O cliente faz o processo de compra, dependo do fluxo de usuários ao mesmo tempo na aplicação, a requisição que é enviada ao backend entra em uma fila por ordem de requisição.
+A aplicação retorna o status 202 de requisição aceita e vai pra fila de processamento. O cliente envia nova requisição e se esta ainda estiver na fila, retorna status 200 informando ao frontend qua ainda está pendente.
+A aplicação frontend fica enviando requisições em determinado espaço de tempo e quando o trabalho no backend é concluído, é retornado status 302 de redirecionamento para uma URL contendo o comprovante do ingresso em PDF finalizando o processo de aquisição do ingresso.
+
+### Diagrama requisições
+
+![Diagrama API](https://github.com/RenatoNr/d4-avaliacao/blob/master/assests/api.png)
+
+## Conclusão
+
+A escolha por criação de máquinas virtuais pareceu mais viável para o projeto pois é o ambiente que estou mais familiarizado, não significando que opções como Containers não seriam melhores escolhas.
+Pelo escopo da aplicação, um sistema de venda de ingressos onde o fluxo de requisições pode ser alto quando é ofertado um show por exemplo, um padrão de Request-Reply assíncrono me pareceu mais correto a ser aplicado.
+
